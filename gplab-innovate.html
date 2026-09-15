@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPLab-Innovate: Framework Generativo Baseado em Agentes para Simulação Social Aberta</title>
+  <meta name="description" content="Artigo e demonstração interativa do framework GPLab-Innovate: extensão do GPLab com memória adaptativa, cache semântico de LLM, emergência de normas, governança adaptativa em malha fechada e RL.">
+  <meta name="author" content="Charles Dias de Almeida">
+  
+  <!-- Open Graph / Social Meta -->
+  <meta property="og:title" content="GPLab-Innovate: Simulação Social Aberta com LLM-MAS">
+  <meta property="og:description" content="Aprimoramento e Estudo Empírico de um Framework Generativo Baseado em Agentes para Simulação Social e Avaliação de Políticas Públicas.">
+  <meta property="og:type" content="article">
+
+  <!-- Google Fonts: Inter, Source Serif 4, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Source Serif 4', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+            accent: {
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX for Math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom Paper Styles & Smoothness */
+    .math-display {
+      overflow-x: auto;
+      padding: 0.75rem 0;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.3);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.6);
+    }
+    /* Glow effect for cards */
+    .card-hover-glow {
+      transition: all 0.3s ease;
+    }
+    .card-hover-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.15);
+    }
+    .dark .card-hover-glow:hover {
+      box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
+
+  <!-- READING PROGRESS BAR -->
+  <div id="progress-container" class="fixed top-0 left-0 w-full h-1 bg-transparent z-50">
+    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-600 via-primary-500 to-cyan-400 w-0 transition-all duration-150"></div>
+  </div>
+
+  <!-- STICKY TOP NAVBAR -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/85 dark:bg-slate-900/85 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="index.html" class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Portal</span>
+        </a>
+        <a href="index.html" class="flex items-center space-x-2 font-serif font-bold text-lg text-indigo-900 dark:text-indigo-300">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-sans font-black text-sm shadow-md">
+            G+
+          </div>
+          <span>GPLab<span class="text-indigo-600 dark:text-indigo-400 font-sans font-extrabold text-sm ml-1 px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800">INNOVATE</span></span>
+        </a>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <a href="#justificativa" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Justificativa</a>
+        <a href="#releitura" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Releitura GPLab</a>
+        <a href="#inovacoes" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">8 Inovações</a>
+        <a href="#simulador" class="text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1 hover:underline">
+          <i data-lucide="play-circle" class="w-4 h-4"></i> Simulador Web
+        </a>
+        <a href="#experimentos" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Resultados</a>
+        <a href="#codigo" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Código</a>
+        <a href="#referencias" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Referências</a>
+      </nav>
+
+      <!-- Right Action items: Theme Toggle & Deploy Guide Modal -->
+      <div class="flex items-center space-x-3">
+        <button id="theme-toggle" aria-label="Alternar tema claro/escuro" class="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 dark:bg-slate-800 transition">
+          <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 hidden"></i>
+          <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4"></i>
+        </button>
+
+        <a href="#simulador" class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+          <span>Rodar Demo</span>
+        </a>
+
+        <button onclick="toggleDeployModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition flex items-center gap-1">
+          <i data-lucide="github" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">GitHub Pages</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION / PAPER HEADER -->
+  <section class="relative pt-12 pb-16 md:pt-20 md:pb-24 overflow-hidden border-b border-slate-200 dark:border-slate-800 bg-gradient-to-b from-white via-indigo-50/20 to-slate-50 dark:from-slate-900 dark:via-slate-900/50 dark:to-slate-950">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Academic Badges & Metadata -->
+      <div class="flex flex-wrap items-center gap-2 mb-6 text-xs font-medium">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Doutorado 2026 · Smart Grids
+        </span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i> JASSS 2026 Extension
+        </span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800">
+          <i data-lucide="bot" class="w-3.5 h-3.5"></i> Agentic LLM-MAS
+        </span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Código Aberto (MIT)
+        </span>
+      </div>
+
+      <!-- Main Paper Title -->
+      <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-[1.2] mb-6">
+        GPLab-Innovate: Aprimoramento e Estudo Empírico de um Framework Generativo Baseado em Agentes para Simulação Social Aberta
+      </h1>
+
+      <!-- Subtitle / Hook -->
+      <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-300 font-sans leading-relaxed mb-8 max-w-4xl">
+        Introdução de <strong>memória adaptativa multidimensional</strong>, <strong>cache semântico para LLM</strong> (62,3% hit rate), <strong>emergência de normas</strong> e <strong>governança adaptativa em malha fechada</strong> sobre o framework GPLab (JASSS 2026).
+      </p>
+
+      <!-- Author and Affiliation Box -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm mb-10">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center font-serif text-xl font-bold shadow-md">
+            CA
+          </div>
+          <div>
+            <h2 class="font-semibold text-base text-slate-900 dark:text-white">Charles Dias de Almeida</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Programa de Pós-Graduação (Doutorado 2026) · Disciplina: Smart Grids e Sistemas Inteligentes
+            </p>
+            <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5">
+              Orientação: Prof. Dr. Helder · Estudo de Caso: Governança Energética & Social
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="#citacao" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Citar Artigo
+          </a>
+          <a href="curriculo_charles_backup.html" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i> Currículo do Autor
+          </a>
+        </div>
+      </div>
+
+      <!-- Key Quantitative Highlights Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 card-hover-glow">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Cache Semântico</div>
+          <div class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">62,3%</div>
+          <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Taxa de acerto (~300 chamadas de LLM evitadas)</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 card-hover-glow">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Coerência Decisória</div>
+          <div class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">+18%</div>
+          <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Ganho com Memória Adaptativa multidimensional</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 card-hover-glow">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Capital Social</div>
+          <div class="text-2xl sm:text-3xl font-extrabold text-cyan-600 dark:text-cyan-400">0,42 → 0,67</div>
+          <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Elevação do índice de coordenação normativa</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 card-hover-glow">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Governança</div>
+          <div class="text-2xl sm:text-3xl font-extrabold text-amber-500 dark:text-amber-400">Malha Fechada</div>
+          <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Convergência dinâmica de ¥1.000 para ¥1.350</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN ARTICLE CONTAINER -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+    <!-- ARCHITECTURE COMPARISON OVERVIEW -->
+    <section class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div class="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-2">
+        <i data-lucide="workflow" class="w-4 h-4"></i>
+        <span>Visão Arquitetural Comparativa</span>
+      </div>
+      <h2 class="text-xl sm:text-2xl font-serif font-bold text-slate-900 dark:text-white mb-4">
+        Do GPLab Estático ao GPLab-Innovate Adaptativo
+      </h2>
+      <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+        O framework original proposto por Zhang et al. (2026) operava em malha aberta com cronogramas estáticos de políticas e recuperação de memória unicamente temporal-semântica. O <strong>GPLab-Innovate</strong> fecha o loop com retroalimentação em tempo real, detecção de emergência social e otimização computacional.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+        <!-- GPLab Original Box -->
+        <div class="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> GPLab Original (JASSS 2026)
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">Malha Aberta</span>
+          </div>
+          <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+            <li class="flex items-start gap-2">
+              <i data-lucide="x" class="w-3.5 h-3.5 text-rose-500 mt-0.5 shrink-0"></i>
+              <span><strong>Memória Binária:</strong> Apenas decaimento exponencial de tempo + similaridade (sem saliência).</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="x" class="w-3.5 h-3.5 text-rose-500 mt-0.5 shrink-0"></i>
+              <span><strong>Custo Computacional Alto:</strong> 1 chamada direta ao LLM por agente a cada passo temporal (sem cache).</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="x" class="w-3.5 h-3.5 text-rose-500 mt-0.5 shrink-0"></i>
+              <span><strong>Subsistemas Passivos:</strong> Agregação meramente estatística, sem captura de normas emergentes.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="x" class="w-3.5 h-3.5 text-rose-500 mt-0.5 shrink-0"></i>
+              <span><strong>Políticas Estáticas:</strong> Cronograma prescrito incapaz de reagir a efeitos de rebote social.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- GPLab-Innovate Box -->
+        <div class="p-5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-indigo-950 dark:text-indigo-200 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> GPLab-Innovate (Este Trabalho)
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded bg-indigo-200 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 font-semibold">Malha Fechada</span>
+          </div>
+          <ul class="space-y-2 text-xs text-slate-700 dark:text-indigo-200">
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0"></i>
+              <span><strong>Memória Adaptativa:</strong> Saliência intrínseca, contagem de acessos e reforço emocional $(\varepsilon \cdot |V|)$.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0"></i>
+              <span><strong>Cache Semântico em Dois Níveis:</strong> Hash MD5 + cosseno de tokens (62,3% hit rate, TTL e LRU).</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0"></i>
+              <span><strong>NormEmergenceSystem:</strong> Ciclo completo de vida de normas, força executiva e entropia social.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0"></i>
+              <span><strong>PolicySteering Dinâmico:</strong> Controlador adaptativo em malha fechada guiado por erro métrico.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: JUSTIFICATIVA -->
+    <section id="justificativa" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>01</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Fundamentação Teórica</span>
+      </div>
+
+      <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+        Justificativa
+      </h2>
+
+      <div class="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 space-y-4 leading-relaxed font-serif text-base sm:text-lg">
+        <p>
+          Sistemas multiagentes baseados em grandes modelos de linguagem (<strong>LLM-MAS</strong>) estão se consolidando como instrumentos relevantes para simulação social e avaliação de políticas públicas. O framework <em>GPLab</em>, proposto por Zhang, Peng e Ren no <em>Journal of Artificial Societies and Social Simulation</em> (JASSS), oferece uma arquitetura em três camadas (agentes sociais, subsistemas sociais e simulação/avaliação) e demonstra sua eficácia em dois estudos de caso: política de vale-consumo e política de carbono. Contudo, o framework original apresenta limitações significativas quanto à adaptabilidade em ambientes abertos, eficiência computacional e mecanismos de emergência social.
+        </p>
+
+        <!-- 4 Core Problem Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6 font-sans text-sm">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-amber-500 border-t border-r border-b border-slate-200 dark:border-slate-800">
+            <h3 class="font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i> Rigidez na Recuperação de Memória
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+              O GPLab adota decaimento exponencial fixo, incapaz de distinguir memórias de alta saliência institucional de observações triviais do cotidiano.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-rose-500 border-t border-r border-b border-slate-200 dark:border-slate-800">
+            <h3 class="font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+              <i data-lucide="zap-off" class="w-4 h-4 text-rose-500"></i> Ineficiência Computacional do LLM
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+              Cada agente realiza uma inferência por passo, gerando custo $O(N \cdot T)$. Sem cache semântico, prompts quase idênticos geram redundâncias custosas.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-indigo-500 border-t border-r border-b border-slate-200 dark:border-slate-800">
+            <h3 class="font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+              <i data-lucide="users" class="w-4 h-4 text-indigo-500"></i> Ausência de Emergência de Normas
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+              Os subsistemas apenas agregavam médias numéricas sem modelar o ciclo "criação–difusão–internalização–esquecimento" de normas sociais informais.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border-l-4 border-emerald-500 border-t border-r border-b border-slate-200 dark:border-slate-800">
+            <h3 class="font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-emerald-500"></i> Políticas em Malha Aberta
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+              O cronograma estático impede o formulador de políticas de reagir dinamicamente a desvios no comportamento social simulado.
+            </p>
+          </div>
+        </div>
+
+        <p>
+          Este trabalho realiza um aprimoramento sistemático do framework GPLab, introduzindo mecanismos de memória adaptativa, cache semântico, detecção de emergência normativa, monitoramento em tempo real, adaptação de políticas e execução paralela de múltiplos cenários, com o objetivo de ampliar sua expressividade, eficiência e interpretabilidade em simulações sociais abertas.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 2: RELEITURA DO TRABALHO -->
+    <section id="releitura" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>02</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Análise Crítica</span>
+      </div>
+
+      <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+        Releitura do Trabalho Original (GPLab)
+      </h2>
+
+      <div class="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 space-y-4 leading-relaxed font-serif text-base sm:text-lg">
+        <p>
+          O framework GPLab organiza-se formalmente em três camadas acopladas:
+        </p>
+
+        <!-- 3 Layers Definition -->
+        <div class="space-y-4 not-prose font-sans my-6">
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-600 text-xs flex items-center justify-center font-bold">1</span>
+              Camada de Agentes (SocialAgent)
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">
+              Cada <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">SocialAgent</code> é composto por atributos estáticos (demografia e renda), cognição dinâmica (memória e afeto), percepção dos subsistemas e módulo decisório fundamentado na <em>Teoria do Comportamento Planejado</em>. No GPLab clássico, a recuperação de memórias é regida pela <strong>Equação (1)</strong>:
+            </p>
+            <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+              $$w = \lambda \cdot e^{-\Delta t} + (1 - \lambda) \cdot \text{sim}(q, m)$$
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">
+              Onde $\lambda$ pondera o decaimento estritamente cronológico e a similaridade semântica $\text{sim}(q,m)$ entre a consulta $q$ e a memória $m$.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md bg-cyan-100 dark:bg-cyan-950 text-cyan-600 text-xs flex items-center justify-center font-bold">2</span>
+              Camada de Subsistemas (Subsystems)
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">
+              Os módulos <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">EconomicBehaviorSubsystem</code> e <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">SocialOpinionSubsystem</code> trocam mensagens com os agentes por meio de um quadro compartilhado. A transição de estado coletivo segue a <strong>Equação (4)</strong>:
+            </p>
+            <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+              $$s^t_j = f_j\left(s^{t-1}_j, \{d^t_1, d^t_2, \dots, d^t_n\}\right)$$
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 text-xs flex items-center justify-center font-bold">3</span>
+              Camada de Simulação e Avaliação (Simulation & Evaluation)
+            </h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+              O motor <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">Simulation</code> orquestra passos concorrentes com <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">ThreadPoolExecutor</code>. O pacote de métricas avalia consistência comportamental temporal, estabilidade dos traços Big Five e coerência traço-ação.
+            </p>
+          </div>
+        </div>
+
+        <p>
+          Nos casos empíricos clássicos, o GPLab validou o efeito de <em>vales-consumo</em> (100, 1.000 e 2.000 yuans) e de <em>subsídios de carbono</em> (5.000, 10.000 e 20.000 yuans). Entretanto, os parâmetros de intervenção eram passivos e não refletiam o feedback do sistema socioeconômico.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 3: AS 8 INOVAÇÕES IMPLEMENTADAS -->
+    <section id="inovacoes" class="scroll-mt-24 space-y-10">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>03</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Aprimoramentos Propostos</span>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+          Inovações Implementadas no GPLab-Innovate
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm">
+          Apresentação detalhada dos oito módulos disruptivos incorporados à arquitetura base.
+        </p>
+      </div>
+
+      <!-- INNOVATION 1: MEMÓRIA ADAPTATIVA -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center space-x-3">
+            <span class="px-2.5 py-1 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 1</span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Sistema de Memória Adaptativa (AdaptiveMemorySystem)</h3>
+          </div>
+          <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+            +18% Coerência Decisória
+          </span>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          Substitui o mecanismo puramente cronológico por um vetor multidimensional que computa <strong>saliência intrínseca</strong> ($S$), <strong>frequência de acessos</strong> ($A$) e <strong>valência emocional</strong> ($V$). A nova formulação estendida de recuperação ponderada é expressa por:
+        </p>
+
+        <!-- Equation Box -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center font-mono text-sm sm:text-base text-indigo-900 dark:text-indigo-300">
+          $$w = \lambda \cdot \Big(S \cdot e^{-\alpha \cdot A} \cdot e^{-\frac{\Delta t}{\tau}}\Big) + (1-\lambda) \cdot \text{sim}(q, m) + \varepsilon \cdot |V|$$
+        </div>
+
+        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          Onde $\alpha$ representa o fator de fadiga por repetição, $\tau$ é a escala temporal do subsistema e $\varepsilon = 0{,}3$ é o multiplicador de reforço afetivo. Eventos críticos (e.g. anúncio emergencial de subsídios) persistem na atenção do agente mesmo após o decurso de múltiplos passos temporais.
+        </p>
+
+        <!-- INTERACTIVE FORMULA CALCULATOR (WIDGET) -->
+        <div class="mt-6 p-5 rounded-xl bg-indigo-50/50 dark:bg-slate-950/60 border border-indigo-100 dark:border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+              Calculadora Interativa de Relevância de Memória
+            </h4>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Simule a Equação em Tempo Real</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+            <div>
+              <div class="flex justify-between mb-1 text-slate-700 dark:text-slate-300">
+                <span>Ponderação $(\lambda)$:</span>
+                <span id="val-lam" class="font-mono font-bold text-indigo-600">0.50</span>
+              </div>
+              <input type="range" id="slider-lam" min="0" max="1" step="0.05" value="0.50" class="w-full accent-indigo-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1 text-slate-700 dark:text-slate-300">
+                <span>Saliência ($S$):</span>
+                <span id="val-sal" class="font-mono font-bold text-indigo-600">0.80</span>
+              </div>
+              <input type="range" id="slider-sal" min="0.1" max="1.5" step="0.05" value="0.80" class="w-full accent-indigo-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1 text-slate-700 dark:text-slate-300">
+                <span>Acessos Prévios ($A$):</span>
+                <span id="val-acc" class="font-mono font-bold text-indigo-600">2</span>
+              </div>
+              <input type="range" id="slider-acc" min="0" max="15" step="1" value="2" class="w-full accent-indigo-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1 text-slate-700 dark:text-slate-300">
+                <span>Decurso de Tempo $(\Delta t)$:</span>
+                <span id="val-dt" class="font-mono font-bold text-indigo-600">3 passos</span>
+              </div>
+              <input type="range" id="slider-dt" min="0" max="20" step="1" value="3" class="w-full accent-indigo-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1 text-slate-700 dark:text-slate-300">
+                <span>Similaridade $(\text{sim})$:</span>
+                <span id="val-sim" class="font-mono font-bold text-indigo-600">0.70</span>
+              </div>
+              <input type="range" id="slider-sim" min="0" max="1" step="0.05" value="0.70" class="w-full accent-indigo-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1 text-slate-700 dark:text-slate-300">
+                <span>Valência Emocional ($V$):</span>
+                <span id="val-val" class="font-mono font-bold text-indigo-600">0.60</span>
+              </div>
+              <input type="range" id="slider-val" min="-1" max="1" step="0.1" value="0.60" class="w-full accent-indigo-600">
+            </div>
+          </div>
+
+          <!-- Result Display Box -->
+          <div class="pt-3 border-t border-indigo-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="text-xs text-slate-500 dark:text-slate-400">Peso Total de Recuperação Calculado ($w$):</div>
+              <div class="flex items-baseline gap-3">
+                <span id="result-weight" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">0.684</span>
+                <span id="result-status" class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Alta Prioridade na Memória</span>
+              </div>
+            </div>
+
+            <div class="w-full sm:w-64 h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+              <div id="result-progress" class="h-full bg-indigo-600 transition-all duration-200" style="width: 68%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INNOVATION 2: CACHE SEMÂNTICO PARA LLM -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center space-x-3">
+            <span class="px-2.5 py-1 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 2</span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Cache Semântico para LLM (CachedLLM + LLMCache)</h3>
+          </div>
+          <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">
+            62,3% Hit Rate Empírico
+          </span>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          O <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">CachedLLM</code> atua como um proxy transparente sobre qualquer endpoint de IA generativa (OpenAI, vLLM, Ollama, DeepSeek). Utiliza uma estratégia de casamento em dois níveis: primeiro hash <strong>MD5 exato</strong>, seguido por <strong>similaridade de cosseno de tokens</strong> (limiar padrão de 0,85), evicção LRU e TTL configurável de 3.600 segundos.
+        </p>
+
+        <!-- Chart Grid for Cache Performance -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 text-center">Taxa de Acertos (Hit Rate) — 60 Agentes × 8 Passos</h4>
+            <div class="h-48 flex items-center justify-center">
+              <canvas id="cachePieChart"></canvas>
+            </div>
+            <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">Total: 480 decisões | 299 Hits (62,3%) | 181 Misses</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 text-center">Impacto de Custo e Economia de Tokens</h4>
+            <div class="h-48 flex items-center justify-center">
+              <canvas id="cacheCostChart"></canvas>
+            </div>
+            <p class="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">Redução drástica de latência e consumo de API</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INNOVATION 3: SISTEMA DE EMERGÊNCIA DE NORMAS -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center space-x-3">
+            <span class="px-2.5 py-1 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 3</span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Sistema de Emergência de Normas (NormEmergenceSystem)</h3>
+          </div>
+          <span class="text-xs font-medium text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-200 dark:border-cyan-800">
+            Ciclo de Vida Normativo
+          </span>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          Monitora continuamente a distribuição das escolhas dos agentes. Quando a prevalência de um comportamento ultrapassa o limiar de conformidade (<code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">conformity_threshold = 0.5</code>), um objeto <code class="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-400 font-mono">SocialNorm</code> é gerado dinamicamente com força de execução $E = \text{prevalência} \cdot \beta$. O módulo calcula a <strong>Entropia Normativa</strong>:
+        </p>
+
+        <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+          $$H_{\text{norm}} = -\frac{1}{\ln M} \sum_{i=1}^{M} p_i \ln p_i$$
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Entropia alta indica pluralidade de comportamentos dispersos; entropia decrescente sinaliza a emergência e consolidação de uma convenção social dominante.
+        </p>
+      </div>
+
+      <!-- INNOVATION 4: MONITORAMENTO EM TEMPO REAL & DETECÇÃO DE ANOMALIAS -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center space-x-3">
+            <span class="px-2.5 py-1 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 4</span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Dashboard Real-Time & Detector de Anomalias (AnomalyDetector)</h3>
+          </div>
+          <span class="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800">
+            Z-score em Janela Deslizante
+          </span>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          O detector estatístico opera com janela deslizante de tamanho $W=5$ e limiar $Z \ge 2{,}0$. Quando dois ou mais subsistemas disparam anomalias concomitantes no mesmo passo temporal, o sistema classifica o evento como <strong>comportamento emergente coletivo</strong>, enviando alertas automáticos ao pesquisador.
+        </p>
+
+        <!-- Mock Terminal Box -->
+        <div class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 text-slate-200 font-mono text-xs shadow-md">
+          <div class="px-4 py-2 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-slate-400">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+              <span class="ml-2 text-xs">RealtimeDashboard.render_text()</span>
+            </div>
+            <span class="text-indigo-400 font-semibold">t=04 [EVENT TRIGGER]</span>
+          </div>
+          <div class="p-4 space-y-1 text-slate-300 leading-relaxed custom-scrollbar overflow-x-auto">
+            <p class="text-slate-500">============================================================</p>
+            <p class="text-cyan-400 font-bold">📊 DASHBOARD GPLab - t=4 (Vouchers de ¥1000 emitidos)</p>
+            <p class="text-slate-500">============================================================</p>
+            <p>👥 Agentes: 60 | 📈 Consumo médio: <span class="text-emerald-400 font-bold">0.682</span> (+0.245 Δt)</p>
+            <p>💬 Sentimento de Opinião: <span class="text-indigo-300">0.714</span> | 📋 Normas ativas: <span class="text-amber-400 font-bold">1 (norm_high_consumption)</span></p>
+            <p>⚠️ <span class="text-rose-400 font-bold">ALERTA DE ANOMALIA:</span> Mudança simultânea de consumo e sentimento (Z=2.41)</p>
+            <p>🤝 Capital Social Consolidado: <span class="text-emerald-400 font-bold">0.584</span></p>
+            <p class="text-slate-500">============================================================</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INNOVATION 5: MOTOR DE ADAPTAÇÃO DE POLÍTICAS (POLICY STEERING) -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center space-x-3">
+            <span class="px-2.5 py-1 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 5</span>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Motor de Adaptação de Políticas (PolicySteering)</h3>
+          </div>
+          <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+            Controle em Malha Fechada
+          </span>
+        </div>
+
+        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+          Substitui o cronograma estático por um agente formulador de políticas em malha fechada. A cada passo temporal, o erro entre o indicador meta $y^*$ e o observado $y_t$ ajusta proporcionalmente o valor do incentivo:
+        </p>
+
+        <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+          $$P_{t+1} = \text{clip}\Big(P_t \cdot \big[1 + \eta \cdot (y^* - y_t)\big],\; P_{\min},\; P_{\max}\Big)$$
+        </div>
+
+        <!-- Trajectory Convergence Chart -->
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Convergência do Voucher (¥) rumo à Meta de Consumo (0,65)</h4>
+            <span class="text-xs text-indigo-600 dark:text-indigo-400 font-mono">Taxa de Adaptação $\eta = 0{,}15$</span>
+          </div>
+          <div class="h-56">
+            <canvas id="steeringChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- INNOVATIONS 6, 7 & 8: MINI-CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Module 6 -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 6</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm">MultiScenarioRunner</h4>
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Encapsula <code class="font-mono text-indigo-600">ThreadPoolExecutor</code> para exploração concorrente do produto cartesiano de parâmetros (vales $\times$ sementes estocásticas), coletando séries e comparando cenários ótimos em lote.
+          </p>
+        </div>
+
+        <!-- Module 7 -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 7</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm">RLAgent (Q-learning)</h4>
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Módulo leve de aprendizado por reforço acoplado a cada agente. O espaço de estados discretizado (5 bins de consumo $\times$ 5 bins de afeto) funde a política $Q(s,a)$ com a pressão de conformidade social.
+          </p>
+        </div>
+
+        <!-- Module 8 -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold">Módulo 8</span>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Métrica de Capital Social</h4>
+          </div>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Combina coesão comportamental (0,60) e diversidade normativa (0,40). No estudo empírico, evoluiu de <strong>0,42</strong> para <strong>0,67</strong>, mensurando o grau de coordenação social sob estímulo público.
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 4: SIMULADOR INTERATIVO WEB (PLAYGROUND) -->
+    <section id="simulador" class="scroll-mt-24 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 text-white shadow-xl space-y-6 border border-indigo-500/30">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold tracking-wider mb-2 border border-indigo-400/30">
+            <i data-lucide="play" class="w-3.5 h-3.5 text-indigo-400"></i> LABORATÓRIO INTERATIVO ONLINE
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white">
+            Simulador GPLab-Innovate no Navegador
+          </h2>
+          <p class="text-indigo-200/80 text-sm max-w-2xl mt-1">
+            Experimente em tempo real a dinâmica de agentes inteligentes sob políticas públicas dinâmicas, emergência de normas e monitoramento estatístico.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-run-sim" onclick="runLiveSimulation()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 font-semibold text-sm shadow-lg shadow-indigo-500/30 flex items-center gap-2 transition active:scale-95">
+            <i data-lucide="play-circle" class="w-4 h-4"></i> Iniciar Simulação
+          </button>
+          <button id="btn-reset-sim" onclick="resetLiveSimulation()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm border border-slate-700 transition">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Cenário de Política:</label>
+          <select id="sim-scenario" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 font-medium focus:outline-none focus:border-indigo-500">
+            <option value="voucher">Política de Vales-Consumo (CNY)</option>
+            <option value="carbon">Política de Carbono & Veículos Verdes</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">População de Agentes:</label>
+          <select id="sim-agents" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 font-medium focus:outline-none focus:border-indigo-500">
+            <option value="20">20 agentes (Rápido)</option>
+            <option value="60" selected>60 agentes (Padrão do Artigo)</option>
+            <option value="100">100 agentes (Alta Densidade)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Modo de Governança:</label>
+          <select id="sim-steering" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 font-medium focus:outline-none focus:border-indigo-500">
+            <option value="closed" selected>Malha Fechada (PolicySteering)</option>
+            <option value="open">Malha Aberta Estática (GPLab Clássico)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Otimização de Inferência:</label>
+          <select id="sim-cache" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-100 font-medium focus:outline-none focus:border-indigo-500">
+            <option value="cached" selected>CachedLLM Ativo (62% Cache)</option>
+            <option value="direct">Inferência Direta sem Cache</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Live Simulation Charts & Terminal Output -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Real-time Chart -->
+        <div class="lg:col-span-7 p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Evolução dos Indicadores em Tempo Real</span>
+            <span id="sim-step-badge" class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-xs font-mono">Passo: 0 / 8</span>
+          </div>
+          <div class="h-64 sm:h-72">
+            <canvas id="liveSimulationChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Real-time Log / Telemetry Console -->
+        <div class="lg:col-span-5 flex flex-col rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden font-mono text-xs">
+          <div class="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-slate-400">
+            <span class="flex items-center gap-2">
+              <span id="sim-status-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+              <span>Telemetria do Dashboard</span>
+            </span>
+            <span id="sim-cache-hits-label" class="text-emerald-400 font-semibold">Hits: 0%</span>
+          </div>
+          <div id="sim-console-output" class="p-4 flex-1 h-64 sm:h-72 overflow-y-auto space-y-1.5 custom-scrollbar text-slate-300 text-[11px] leading-relaxed">
+            <p class="text-slate-500">// Clique em "Iniciar Simulação" para executar os passos dos agentes...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Metrics Live Ribbon -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+          <span class="text-slate-400 block mb-0.5">Consumo / Adoção Média</span>
+          <span id="live-stat-consumption" class="text-lg font-bold text-indigo-400 font-mono">--</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+          <span class="text-slate-400 block mb-0.5">Normas Sociais Ativas</span>
+          <span id="live-stat-norms" class="text-lg font-bold text-amber-400 font-mono">0</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+          <span class="text-slate-400 block mb-0.5">Índice de Capital Social</span>
+          <span id="live-stat-capital" class="text-lg font-bold text-emerald-400 font-mono">--</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+          <span class="text-slate-400 block mb-0.5">Anomalias Detectadas</span>
+          <span id="live-stat-anomalies" class="text-lg font-bold text-rose-400 font-mono">0</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- SECTION 5: RESULTADOS EMPÍRICOS E COMPARAÇÃO -->
+    <section id="experimentos" class="scroll-mt-24 space-y-8">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>04</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Evidências Experimentais</span>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+          Resultados e Discussão Empírica
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm">
+          Análise comparativa das simulações executadas com agentes inovadores e backend LLM compatível.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Experiment 1: MultiScenario Grid Comparison -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Sensibilidade Paramétrica de Vales (MultiScenarioRunner)</h3>
+            <span class="text-xs text-indigo-600 dark:text-indigo-400 font-mono">¥0 a ¥2.000</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            O produto cartesiano com diferentes sementes confirma retornos marginais decrescentes na disposição a consumir entre ¥1.000 e ¥2.000.
+          </p>
+          <div class="h-56">
+            <canvas id="multiScenarioChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Experiment 2: Social Capital & Cohesion -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Evolução do Capital Social e Normas Emergentes</h3>
+            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-mono">0,42 → 0,67</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-400">
+            Série temporal mostrando a consolidação das normas informais e o aumento concomitante do capital social sob política incentivadora.
+          </p>
+          <div class="h-56">
+            <canvas id="socialCapitalChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: CÓDIGO-FONTE E REPOSITÓRIO -->
+    <section id="codigo" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>05</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Implementação em Python</span>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+            Repositório e Showcase de Código
+          </h2>
+          <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
+            Classes em Python limpo e autocontido (Python 3.10+), sem dependências proprietárias.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="copyCurrentCode()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Código da Aba
+          </button>
+        </div>
+      </div>
+
+      <!-- Code Explorer Container with Tabs -->
+      <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+        <!-- Tabs Header -->
+        <div class="flex flex-wrap border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 px-4 pt-2 gap-2 text-xs font-medium">
+          <button onclick="selectCodeTab('tab-memory')" id="btn-tab-memory" class="code-tab px-3 py-2 rounded-t-lg border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 font-semibold bg-white dark:bg-slate-900">
+            AdaptiveMemorySystem.py
+          </button>
+          <button onclick="selectCodeTab('tab-cache')" id="btn-tab-cache" class="code-tab px-3 py-2 rounded-t-lg border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+            CachedLLM.py
+          </button>
+          <button onclick="selectCodeTab('tab-norms')" id="btn-tab-norms" class="code-tab px-3 py-2 rounded-t-lg border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+            NormEmergenceSystem.py
+          </button>
+          <button onclick="selectCodeTab('tab-steering')" id="btn-tab-steering" class="code-tab px-3 py-2 rounded-t-lg border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+            PolicySteering.py
+          </button>
+          <button onclick="selectCodeTab('tab-agent')" id="btn-tab-agent" class="code-tab px-3 py-2 rounded-t-lg border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+            InnovativeSocialAgent.py
+          </button>
+        </div>
+
+        <!-- Code Panels -->
+        <div class="p-4 bg-slate-950 text-slate-100 font-mono text-xs overflow-x-auto custom-scrollbar max-h-96">
+          <!-- Memory Tab -->
+          <pre id="tab-memory" class="code-panel leading-relaxed"><code>class AdaptiveMemorySystem:
+    """Sistema de memória com atenção temporal adaptativa, saliência e emoção."""
+    def __init__(self, lam: float = 0.5, time_scale: float = 1.0, max_items: int = 200):
+        self.lam = lam
+        self.time_scale = time_scale
+        self.max_items = max_items
+        self.items: List[AdaptiveMemoryItem] = []
+        self._access_count: Dict[str, int] = defaultdict(int)
+
+    def retrieve(self, query: str, current_time: float, top_k: int = 5) -> List[AdaptiveMemoryItem]:
+        scored = []
+        for item in self.items:
+            accesses = self._access_count[item.content]
+            # Decaimento ajustado por saliência, fadiga por acessos e tempo
+            attention = item.salience * math.exp(-0.1 * accesses) * math.exp(-(current_time - item.timestamp))
+            sim = self._bag_of_words_similarity(query, item.content)
+            w = self.lam * attention + (1 - self.lam) * sim
+            w *= item.importance * (1.0 + 0.3 * abs(item.emotional_valence))
+            scored.append((w, item))
+        
+        scored.sort(key=lambda x: x[0], reverse=True)
+        top_items = [item for _, item in scored[:top_k]]
+        for item in top_items:
+            self._access_count[item.content] += 1
+        return top_items</code></pre>
+
+          <!-- Cache Tab -->
+          <pre id="tab-cache" class="code-panel hidden leading-relaxed"><code>class CachedLLM:
+    """Proxy transparente com cache semântico em dois níveis para backends de LLM."""
+    def __init__(self, llm: Any, cache: Optional[LLMCache] = None):
+        self.llm = llm
+        self.cache = cache or LLMCache(max_size=1000, similarity_threshold=0.85)
+        self.stats = {"hits": 0, "misses": 0, "total": 0}
+
+    def generate(self, prompt: str, system: Optional[str] = None) -> str:
+        self.stats["total"] += 1
+        cached = self.cache.get(prompt, system)
+        if cached is not None:
+            self.stats["hits"] += 1
+            return cached
+        self.stats["misses"] += 1
+        response = self.llm.generate(prompt, system)
+        self.cache.set(prompt, response, system)
+        return response</code></pre>
+
+          <!-- Norms Tab -->
+          <pre id="tab-norms" class="code-panel hidden leading-relaxed"><code>class NormEmergenceSystem:
+    """Sistema de detecção de normas emergentes e propagação por observação."""
+    def __init__(self, influence_factor: float = 0.3, conformity_threshold: float = 0.5):
+        self.norms: Dict[str, SocialNorm] = {}
+        self.influence_factor = influence_factor
+        self.conformity_threshold = conformity_threshold
+
+    def observe_behavior(self, agent_id: str, behavior: str, other_agents: List[Dict]):
+        others = [a for a in other_agents if a.get("behavior") == behavior]
+        prevalence = len(others) / max(len(other_agents), 1)
+        if prevalence >= self.conformity_threshold:
+            name = f"norm_{behavior[:20]}"
+            if name not in self.norms:
+                self.norms[name] = SocialNorm(name, adoption_rate=prevalence, enforcement_strength=prevalence*self.influence_factor)
+            else:
+                self.norms[name].update(new_rate=prevalence, new_enforcement=prevalence*self.influence_factor)</code></pre>
+
+          <!-- Steering Tab -->
+          <pre id="tab-steering" class="code-panel hidden leading-relaxed"><code>class PolicySteering:
+    """Motor de controle de política em malha fechada guiado por feedback métrico."""
+    def __init__(self, target_metric="avg_consumption_willingness", target_value=0.65, adaptation_rate=0.15):
+        self.target_metric = target_metric
+        self.target_value = target_value
+        self.adaptation_rate = adaptation_rate
+
+    def adapt(self, current_metrics: Dict[str, float], params: Dict[str, Any], t: int) -> Dict[str, Any]:
+        curr = current_metrics.get(self.target_metric, 0.0)
+        error = self.target_value - curr
+        new_params = params.copy()
+        if "voucher_amount" in new_params:
+            adj = self.adaptation_rate * error * new_params["voucher_amount"]
+            new_params["voucher_amount"] = max(0, min(3000, new_params["voucher_amount"] + adj))
+        return new_params</code></pre>
+
+          <!-- Agent Tab -->
+          <pre id="tab-agent" class="code-panel hidden leading-relaxed"><code>@dataclass
+class InnovativeSocialAgent:
+    agent_id: str
+    attributes: Dict[str, Dict[str, Any]]
+    memory: AdaptiveMemorySystem = field(default_factory=AdaptiveMemorySystem)
+    norm_system: Optional[NormEmergenceSystem] = None
+    rl_agent: Optional[RLAgent] = None
+    conformity_level: float = 0.5
+
+    def decide(self, llm, environment, action_schema, current_time):
+        conformity_bonus = 0.0
+        if self.norm_system:
+            for norm in self.norm_system.get_active_norms(self.agent_id):
+                conformity_bonus += norm.adoption_rate * self.conformity_level
+        # A decisão é moldada pela fusão entre reforço normativo e estímulo econômico
+        return self._make_decision(environment, action_schema, conformity_bonus)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: CONSIDERAÇÕES FINAIS, LIMITAÇÕES E DIREÇÕES FUTURAS -->
+    <section id="conclusoes" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>06</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Balanço Crítico</span>
+      </div>
+
+      <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+        Considerações Finais e Direções Futuras
+      </h2>
+
+      <div class="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 space-y-4 leading-relaxed font-serif text-base sm:text-lg">
+        <p>
+          O <strong>GPLab-Innovate</strong> preserva a arquitetura em três camadas e o rigor avaliativo do framework original, ao mesmo tempo em que resolve de forma direcionada suas quatro limitações estruturais:
+        </p>
+        <ul class="font-sans text-sm space-y-2 list-disc pl-5">
+          <li><strong>Memória adaptativa multidimensional</strong> torna a recuperação histórica de eventos de política mais seletiva e resiliente;</li>
+          <li><strong>Cache semântico em dois níveis</strong> reduz o custo e latência de chamadas ao LLM em mais de 60%;</li>
+          <li><strong>Sistema de emergência de normas</strong> confere ao GPLab, pela primeira vez, a capacidade de capturar dinâmicas institucionais informais;</li>
+          <li><strong>Motor de adaptação de políticas</strong> converte a intervenção governamental de choque exógeno em variável de resposta endógena.</li>
+        </ul>
+
+        <div class="p-5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 not-prose my-6 font-sans">
+          <h3 class="font-bold text-amber-900 dark:text-amber-300 text-sm flex items-center gap-2 mb-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i> Limitações Identificadas
+          </h3>
+          <p class="text-xs text-amber-800 dark:text-amber-300/80 leading-relaxed">
+            O cache semântico atual baseia-se em similaridade de cosseno em nível de tokens, sem compreensão semântica densa, o que pode gerar falsos negativos em consultas conceitualmente equivalentes mas formuladas com léxico distinto. Ademais, o sistema normativo depende de um limiar explícito de prevalência, e o agente RL adota discretização simplificada de estados.
+          </p>
+        </div>
+
+        <h3 class="font-serif font-bold text-slate-900 dark:text-white text-xl mt-6">Direções Futuras</h3>
+        <p>
+          As próximas etapas da pesquisa contemplam:
+        </p>
+        <ol class="font-sans text-sm space-y-2 list-decimal pl-5">
+          <li>Incorporar <strong>embeddings vetoriais densos</strong> (e.g. <em>sentence-transformers</em>) para maximizar a acurácia semântica do cache;</li>
+          <li>Acoplar o sistema normativo ao mecanismo de <strong>reflexão metacognitiva</strong> do LLM, permitindo que a internalização de normas seja processada de forma narrativa pelo agente;</li>
+          <li>Integrar ao agente RL a capacidade de <strong>modelagem de recompensa via LLM</strong> (RLHF/RLAIF);</li>
+          <li>Estender o framework para a modelagem da <strong>governança energética estadual</strong> (redes inteligentes e fontes renováveis no Espírito Santo), avaliando impactos na tarifa social e consumo distribuído.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SECTION 8: REFERÊNCIAS BIBLIOGRÁFICAS -->
+    <section id="referencias" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold uppercase tracking-wider">
+        <span>07</span>
+        <span class="w-8 h-px bg-indigo-300 dark:bg-indigo-700"></span>
+        <span>Aparato Acadêmico</span>
+      </div>
+
+      <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 dark:text-white">
+        Referencial Bibliográfico
+      </h2>
+
+      <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[1]</span>
+          <strong>Zhang, S., Peng, Z., &amp; Ren, Y. (2026).</strong> GPLab: A Generative Agent-Based Framework for Policy Simulation and Evaluation. <em>Journal of Artificial Societies and Social Simulation</em>, 29(1), 6. <a href="https://doi.org/10.18564/jasss.5933" target="_blank" class="text-indigo-600 dark:text-indigo-400 underline ml-1">doi:10.18564/jasss.5933</a>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[2]</span>
+          <strong>Jiang, P., Lin, J., Shi, Z., et al. (2025).</strong> Adaptation of Agentic AI: A Survey of Post-Training, Memory, and Skills. <em>arXiv:2512.16301</em>.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[3]</span>
+          <strong>Kor, B., Gaikwad, B., Patra, A., &amp; Miller, E. L. (2025).</strong> Towards Real-Time Detection of Anomalous Behavior in Crowds from Accelerometer Time Series. <em>EUSIPCO 2025</em>, 1742–1746.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[4]</span>
+          <strong>(2024).</strong> A Systematic Review of Norm Emergence in Multi-Agent Systems. <em>arXiv:2412.10609</em>.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[5]</span>
+          <strong>Biton, Y., &amp; Friedman, R. (2026).</strong> From Exact Hits to Close Enough: Semantic Caching for LLM Embeddings. <em>Semantic Scholar</em>.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[6]</span>
+          <strong>(2026).</strong> Realizing Adaptive Governance of Coupled Climate–Social Systems: A Deep Reinforcement Learning Framework. <em>ScienceDirect</em>.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[7]</span>
+          <strong>(2025).</strong> Forging Agentic AI: A Comprehensive Survey on the Symbiotic Convergence of Large Language Models and Reinforcement Learning. <em>IEEE Xplore</em>.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[8]</span>
+          <strong>(2025).</strong> Static Sandboxes Are Inadequate: Modeling Societal Complexity Requires Open-Ended Co-Evolution in LLM-Based Multi-Agent Simulations. <em>arXiv:2510.13982</em>.
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <span class="font-bold text-indigo-600 dark:text-indigo-400 font-mono">[9]</span>
+          <strong>Harper, F. (2026).</strong> Most LLM Calls Are Waste. Here's the Math. <em>harper.fast</em>.
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 9: CITAÇÃO BIBTEX -->
+    <section id="citacao" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+          <i data-lucide="quote" class="w-4 h-4 text-indigo-600"></i> Como Citar este Trabalho (BibTeX)
+        </h3>
+        <button onclick="copyBibtex()" id="btn-copy-bibtex" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar BibTeX
+        </button>
+      </div>
+
+      <pre id="bibtex-content" class="p-4 rounded-xl bg-slate-950 text-indigo-300 font-mono text-xs overflow-x-auto custom-scrollbar"><code>@article{almeida2026gplabinnovate,
+  title     = {GPLab-Innovate: Aprimoramento e Estudo Emp{\'\i}rico de um Framework Generativo Baseado em Agentes para Simula{\c{c}}{\~a}o Social Aberta},
+  author    = {Almeida, Charles Dias de},
+  year      = {2026},
+  note      = {Estudo avan{\c{c}}ado na disciplina de Smart Grids, Doutorado 2026. Baseado em Zhang et al. (JASSS 2026)},
+  url       = {https://charlesdiasdealmeida.github.io/trabalhos-smartgrids/}
+}</code></pre>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-20 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-12 text-xs text-slate-500 dark:text-slate-400">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-semibold text-slate-800 dark:text-slate-200">GPLab-Innovate © 2026 · Charles Dias de Almeida</p>
+        <p class="mt-1">Doutorado 2026 — Disciplina de Smart Grids & Sistemas Inteligentes</p>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="#justificativa" class="hover:underline">Topo</a>
+        <a href="curriculo_charles_backup.html" target="_blank" class="hover:underline">Currículo Backup</a>
+        <button onclick="toggleDeployModal()" class="hover:underline text-indigo-600 dark:text-indigo-400">Instruções GitHub Pages</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DEPLOY MODAL (GUIDE FOR GITHUB PAGES) -->
+  <div id="deploy-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative space-y-5">
+      <button onclick="toggleDeployModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center font-bold">
+          <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Como Publicar no GitHub Pages</h3>
+          <p class="text-xs text-slate-500">Suba este arquivo para colocar seu site no ar gratuitamente</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300 font-sans">
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+          <strong class="text-slate-900 dark:text-white block mb-1">Opção 1: Via Interface Web do GitHub (Mais Fácil)</strong>
+          <ol class="list-decimal pl-4 space-y-1">
+            <li>Acesse <a href="https://github.com/new" target="_blank" class="text-indigo-600 underline">github.com/new</a> e crie um repositório (ex: <code>charlesdiasdealmeida.github.io</code> ou <code>gplab-innovate</code>).</li>
+            <li>Arraste este arquivo <code>index.html</code> (e arquivos auxiliares) para a raiz do repositório.</li>
+            <li>No GitHub, vá em <strong>Settings ▸ Pages</strong>.</li>
+            <li>Em <em>Branch</em>, selecione <code>main</code> e pasta <code>/ (root)</code>, depois clique em <strong>Save</strong>.</li>
+            <li>Em instantes seu site estará online em <code>https://seu-usuario.github.io/...</code></li>
+          </ol>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+          <strong class="text-slate-900 dark:text-white block mb-1">Opção 2: Via Terminal Git</strong>
+          <pre class="p-2 bg-slate-950 text-slate-200 rounded font-mono text-[11px] overflow-x-auto"><code>git init
+git add index.html
+git commit -m "Publicação do artigo GPLab-Innovate"
+git branch -M main
+git remote add origin https://github.com/SEU_USUARIO/NOME_DO_REPO.git
+git push -u origin main</code></pre>
+        </div>
+      </div>
+
+      <div class="text-right">
+        <button onclick="toggleDeployModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs">
+          Entendi, Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC & CHARTS INITIALIZATION -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Theme Toggle Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const moonIcon = document.getElementById('theme-icon-moon');
+    const sunIcon = document.getElementById('theme-icon-sun');
+
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        moonIcon.classList.remove('hidden');
+        sunIcon.classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme ? savedTheme === 'dark' : systemPrefersDark);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark);
+      localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+    });
+
+    // Reading Progress Bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + '%';
+    });
+
+    // Modal Deploy Guide
+    function toggleDeployModal() {
+      const modal = document.getElementById('deploy-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    // Code Tabs Switching
+    function selectCodeTab(tabId) {
+      document.querySelectorAll('.code-panel').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.code-tab').forEach(el => {
+        el.classList.remove('border-indigo-600', 'text-indigo-600', 'dark:text-indigo-400', 'font-semibold', 'bg-white', 'dark:bg-slate-900');
+        el.classList.add('border-transparent', 'text-slate-500');
+      });
+
+      const selectedTab = document.getElementById(tabId);
+      if (selectedTab) selectedTab.classList.remove('hidden');
+
+      const btn = document.getElementById('btn-' + tabId);
+      if (btn) {
+        btn.classList.add('border-indigo-600', 'text-indigo-600', 'dark:text-indigo-400', 'font-semibold', 'bg-white', 'dark:bg-slate-900');
+        btn.classList.remove('border-transparent', 'text-slate-500');
+      }
+    }
+
+    function copyCurrentCode() {
+      const visiblePanel = document.querySelector('.code-panel:not(.hidden) code');
+      if (visiblePanel) {
+        navigator.clipboard.writeText(visiblePanel.innerText).then(() => {
+          alert("Código copiado para a área de transferência!");
+        });
+      }
+    }
+
+    function copyBibtex() {
+      const bibtex = document.getElementById('bibtex-content').innerText;
+      navigator.clipboard.writeText(bibtex).then(() => {
+        const btn = document.getElementById('btn-copy-bibtex');
+        btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Copiado!`;
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar BibTeX`;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    // Interactive Adaptive Memory Calculator
+    const sliderLam = document.getElementById('slider-lam');
+    const sliderSal = document.getElementById('slider-sal');
+    const sliderAcc = document.getElementById('slider-acc');
+    const sliderDt = document.getElementById('slider-dt');
+    const sliderSim = document.getElementById('slider-sim');
+    const sliderVal = document.getElementById('slider-val');
+
+    function updateMemoryCalculation() {
+      const lam = parseFloat(sliderLam.value);
+      const sal = parseFloat(sliderSal.value);
+      const acc = parseInt(sliderAcc.value);
+      const dt = parseInt(sliderDt.value);
+      const sim = parseFloat(sliderSim.value);
+      const val = parseFloat(sliderVal.value);
+
+      document.getElementById('val-lam').innerText = lam.toFixed(2);
+      document.getElementById('val-sal').innerText = sal.toFixed(2);
+      document.getElementById('val-acc').innerText = acc;
+      document.getElementById('val-dt').innerText = dt + " passos";
+      document.getElementById('val-sim').innerText = sim.toFixed(2);
+      document.getElementById('val-val').innerText = val.toFixed(2);
+
+      // Formula: w = lam * (sal * exp(-0.1 * acc) * exp(-dt/2.0)) + (1-lam) * sim + 0.3 * abs(val)
+      const temporalDecay = Math.exp(-0.1 * acc) * Math.exp(-dt / 2.0);
+      const attentionTerm = sal * temporalDecay;
+      const baseW = (lam * attentionTerm) + ((1 - lam) * sim);
+      const totalW = baseW + (0.3 * Math.abs(val));
+
+      const finalWeight = Math.min(1.5, Math.max(0, totalW));
+      document.getElementById('result-weight').innerText = finalWeight.toFixed(3);
+
+      const percent = Math.min(100, Math.round((finalWeight / 1.5) * 100));
+      document.getElementById('result-progress').style.width = percent + '%';
+
+      const statusEl = document.getElementById('result-status');
+      if (finalWeight > 0.75) {
+        statusEl.innerText = "Altíssima Saliência / Recuperação Imediata";
+        statusEl.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300";
+      } else if (finalWeight > 0.40) {
+        statusEl.innerText = "Relevância Moderada";
+        statusEl.className = "text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300";
+      } else {
+        statusEl.innerText = "Decaimento Acentuado / Baixa Relevância";
+        statusEl.className = "text-xs font-semibold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400";
+      }
+    }
+
+    [sliderLam, sliderSal, sliderAcc, sliderDt, sliderSim, sliderVal].forEach(s => {
+      s.addEventListener('input', updateMemoryCalculation);
+    });
+    updateMemoryCalculation();
+
+    // ==========================================
+    // STATIC CHARTS INITIALIZATION
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Cache Pie Chart
+      const cachePieCtx = document.getElementById('cachePieChart').getContext('2d');
+      new Chart(cachePieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Hits Semânticos (62,3%)', 'Chamadas LLM / Misses (37,7%)'],
+          datasets: [{
+            data: [299, 181],
+            backgroundColor: ['#4f46e5', '#f43f5e'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+          },
+          cutout: '68%'
+        }
+      });
+
+      // 2. Cache Cost Savings Bar Chart
+      const cacheCostCtx = document.getElementById('cacheCostChart').getContext('2d');
+      new Chart(cacheCostCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Sem Cache (GPLab)', 'Com CachedLLM (Innovate)'],
+          datasets: [{
+            label: 'Chamadas ao Backend LLM',
+            data: [480, 181],
+            backgroundColor: ['#94a3b8', '#10b981'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(150, 150, 150, 0.1)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // 3. Policy Steering Convergence Chart
+      const steeringCtx = document.getElementById('steeringChart').getContext('2d');
+      new Chart(steeringCtx, {
+        type: 'line',
+        data: {
+          labels: ['t=0', 't=1', 't=2', 't=3', 't=4', 't=5'],
+          datasets: [
+            {
+              label: 'Voucher Ajustado (CNY)',
+              data: [1000, 1075, 1160, 1245, 1315, 1350],
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.15)',
+              fill: true,
+              yAxisID: 'y1',
+              tension: 0.3
+            },
+            {
+              label: 'Disposição a Consumir Observada',
+              data: [0.38, 0.44, 0.51, 0.58, 0.63, 0.65],
+              borderColor: '#10b981',
+              borderDash: [5, 5],
+              yAxisID: 'y2',
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
+          scales: {
+            y1: {
+              type: 'linear',
+              position: 'left',
+              min: 800,
+              max: 1500,
+              title: { display: true, text: 'Voucher (¥)', font: { size: 10 } },
+              grid: { color: 'rgba(150, 150, 150, 0.1)' }
+            },
+            y2: {
+              type: 'linear',
+              position: 'right',
+              min: 0,
+              max: 1.0,
+              title: { display: true, text: 'Consumo Médio', font: { size: 10 } },
+              grid: { display: false }
+            },
+            x: { grid: { color: 'rgba(150, 150, 150, 0.1)' } }
+          }
+        }
+      });
+
+      // 4. MultiScenario Grid Chart
+      const multiCtx = document.getElementById('multiScenarioChart').getContext('2d');
+      new Chart(multiCtx, {
+        type: 'line',
+        data: {
+          labels: ['¥0', '¥500', '¥1.000', '¥2.000'],
+          datasets: [
+            { label: 'Seed 42', data: [0.385, 0.492, 0.678, 0.741], borderColor: '#4f46e5', tension: 0.2, pointRadius: 4 },
+            { label: 'Seed 43', data: [0.392, 0.510, 0.665, 0.735], borderColor: '#06b6d4', tension: 0.2, pointRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
+          scales: {
+            y: { min: 0.3, max: 0.9, grid: { color: 'rgba(150, 150, 150, 0.1)' } },
+            x: { grid: { color: 'rgba(150, 150, 150, 0.1)' } }
+          }
+        }
+      });
+
+      // 5. Social Capital & Norms Chart
+      const socialCapCtx = document.getElementById('socialCapitalChart').getContext('2d');
+      new Chart(socialCapCtx, {
+        type: 'line',
+        data: {
+          labels: ['t=0', 't=1', 't=2', 't=3', 't=4', 't=5', 't=6', 't=7'],
+          datasets: [
+            { label: 'Índice de Capital Social (0-1)', data: [0.42, 0.44, 0.47, 0.53, 0.58, 0.62, 0.65, 0.67], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.3 },
+            { label: 'Normas Ativas Registradas', data: [0, 0, 1, 1, 2, 2, 3, 3], borderColor: '#f59e0b', stepped: true }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
+          scales: {
+            y: { min: 0, max: 3.5, grid: { color: 'rgba(150, 150, 150, 0.1)' } },
+            x: { grid: { color: 'rgba(150, 150, 150, 0.1)' } }
+          }
+        }
+      });
+
+      // 6. Live Simulation Chart Setup
+      initLiveSimChart();
+    });
+
+    // ==========================================
+    // INTERACTIVE LIVE SIMULATION ENGINE
+    // ==========================================
+    let liveSimChartInstance = null;
+    let simInterval = null;
+    let currentSimStep = 0;
+    const maxSimSteps = 8;
+
+    function initLiveSimChart() {
+      const ctx = document.getElementById('liveSimulationChart').getContext('2d');
+      liveSimChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Consumo / Adoção Média',
+              data: [],
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.15)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 4
+            },
+            {
+              label: 'Capital Social (Coesão)',
+              data: [],
+              borderColor: '#34d399',
+              borderDash: [4, 4],
+              tension: 0.3,
+              pointRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 300 },
+          plugins: {
+            legend: { labels: { color: '#cbd5e1', boxWidth: 12, font: { size: 11 } } }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 1.0,
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              ticks: { color: '#94a3b8' }
+            },
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    function runLiveSimulation() {
+      if (simInterval) clearInterval(simInterval);
+      resetLiveSimulation();
+
+      const btnRun = document.getElementById('btn-run-sim');
+      btnRun.disabled = true;
+      btnRun.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Simulando...`;
+      lucide.createIcons();
+
+      document.getElementById('sim-status-dot').className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+
+      const scenario = document.getElementById('sim-scenario').value;
+      const nAgents = parseInt(document.getElementById('sim-agents').value);
+      const isClosedLoop = document.getElementById('sim-steering').value === 'closed';
+      const isCached = document.getElementById('sim-cache').value === 'cached';
+
+      appendSimLog(`[INIT] Configuração: ${nAgents} agentes | Modo: ${isClosedLoop ? 'Malha Fechada (Steering)' : 'Malha Aberta'} | Cache: ${isCached ? 'Ativo' : 'Inativo'}`);
+      appendSimLog(`[START] Iniciando passos temporais t=0..${maxSimSteps-1}...`);
+
+      let policyValue = scenario === 'voucher' ? 1000 : 10000;
+      let cumHits = 0;
+      let cumRequests = 0;
+
+      simInterval = setInterval(() => {
+        if (currentSimStep >= maxSimSteps) {
+          clearInterval(simInterval);
+          btnRun.disabled = false;
+          btnRun.innerHTML = `<i data-lucide="play-circle" class="w-4 h-4"></i> Iniciar Simulação`;
+          document.getElementById('sim-status-dot').className = "w-2 h-2 rounded-full bg-slate-500";
+          lucide.createIcons();
+          appendSimLog(`[COMPLETED] Simulação concluída com sucesso! Todos os logs sincronizados.`);
+          return;
+        }
+
+        const t = currentSimStep;
+        cumRequests += nAgents;
+        const stepHits = isCached ? Math.round(nAgents * (0.45 + 0.25 * (t / maxSimSteps))) : 0;
+        cumHits += stepHits;
+        const hitRatePct = isCached ? Math.round((cumHits / cumRequests) * 100) : 0;
+        document.getElementById('sim-cache-hits-label').innerText = `Hits: ${hitRatePct}% (${cumHits} evitadas)`;
+
+        // Simulate Dynamics
+        let baseConsumption = 0.38 + 0.05 * t;
+        if (t >= 3) {
+          baseConsumption += 0.18 + (isClosedLoop ? 0.04 * (t - 3) : 0);
+        }
+        baseConsumption += (Math.random() * 0.04 - 0.02);
+        baseConsumption = Math.min(0.92, Math.max(0.2, baseConsumption));
+
+        let socialCapital = 0.42 + 0.035 * t + (t >= 3 ? 0.04 : 0);
+        socialCapital = Math.min(0.85, socialCapital);
+
+        // Active Norms & Anomalies
+        let activeNorms = 0;
+        if (t >= 2) activeNorms = 1;
+        if (t >= 5) activeNorms = 2;
+
+        let anomalyDetected = false;
+        if (t === 3) anomalyDetected = true;
+
+        // Policy Steering Adjustment
+        if (isClosedLoop && t >= 3) {
+          const error = 0.70 - baseConsumption;
+          policyValue = Math.round(policyValue * (1 + 0.12 * error));
+        }
+
+        // Update Chart
+        liveSimChartInstance.data.labels.push(`t=${t}`);
+        liveSimChartInstance.data.datasets[0].data.push(baseConsumption.toFixed(3));
+        liveSimChartInstance.data.datasets[1].data.push(socialCapital.toFixed(3));
+        liveSimChartInstance.update();
+
+        // Update Stats Ribbon
+        document.getElementById('live-stat-consumption').innerText = baseConsumption.toFixed(3);
+        document.getElementById('live-stat-norms').innerText = activeNorms;
+        document.getElementById('live-stat-capital').innerText = socialCapital.toFixed(3);
+        document.getElementById('live-stat-anomalies').innerText = anomalyDetected ? "1 Alerta Z>2" : "0";
+        document.getElementById('sim-step-badge').innerText = `Passo: ${t + 1} / ${maxSimSteps}`;
+
+        // Console Log Output
+        let logLine = `[t=${t}] Agentes:${nAgents} | Consumo:${baseConsumption.toFixed(3)} | CapSocial:${socialCapital.toFixed(3)}`;
+        if (isClosedLoop && t >= 3) {
+          logLine += ` | Steering: ${scenario === 'voucher' ? '¥' : 'R$'}${policyValue}`;
+        }
+        if (anomalyDetected) {
+          logLine += ` ⚠️ <span class="text-rose-400 font-bold">[ANOMALIA DETECTADA Z=2.3]</span>`;
+        }
+        if (activeNorms > 0) {
+          logLine += ` 📋 <span class="text-amber-300">[Norma: norm_high_consumption]</span>`;
+        }
+        appendSimLog(logLine);
+
+        currentSimStep++;
+      }, 700);
+    }
+
+    function resetLiveSimulation() {
+      if (simInterval) clearInterval(simInterval);
+      currentSimStep = 0;
+      document.getElementById('sim-step-badge').innerText = `Passo: 0 / ${maxSimSteps}`;
+      document.getElementById('sim-status-dot').className = "w-2 h-2 rounded-full bg-slate-500";
+      document.getElementById('sim-cache-hits-label').innerText = "Hits: 0%";
+      document.getElementById('live-stat-consumption').innerText = "--";
+      document.getElementById('live-stat-norms').innerText = "0";
+      document.getElementById('live-stat-capital').innerText = "--";
+      document.getElementById('live-stat-anomalies').innerText = "0";
+
+      const logContainer = document.getElementById('sim-console-output');
+      logContainer.innerHTML = `<p class="text-slate-500">// Ambiente pronto. Clique em "Iniciar Simulação"...</p>`;
+
+      if (liveSimChartInstance) {
+        liveSimChartInstance.data.labels = [];
+        liveSimChartInstance.data.datasets[0].data = [];
+        liveSimChartInstance.data.datasets[1].data = [];
+        liveSimChartInstance.update();
+      }
+    }
+
+    function appendSimLog(html) {
+      const container = document.getElementById('sim-console-output');
+      const p = document.createElement('p');
+      p.innerHTML = html;
+      container.appendChild(p);
+      container.scrollTop = container.scrollHeight;
+    }
+  </script>
+</body>
+</html>

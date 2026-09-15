@@ -1,345 +1,403 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Charles Dias de Almeida</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#1C2B39;
-    --ivory:#F6F3EC;
-    --bronze:#A9793E;
-    --graphite:#3A4048;
-    --line: rgba(28,43,57,0.14);
-    --max-line: 62ch;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charles Dias de Almeida — Portal Acadêmico & Pesquisa | Smart Grids 2026</title>
+  <meta name="description" content="Página pessoal e portal acadêmico de Charles Dias de Almeida (Doutorado 2026). Apresentação do artigo e simulador GPLab-Innovate para simulação social aberta.">
+  <meta name="author" content="Charles Dias de Almeida">
 
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  <!-- Google Fonts: Inter, Source Serif 4, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
 
-  body{
-    margin:0;
-    background:var(--ivory);
-    color:var(--ink);
-    font-family:'Inter', sans-serif;
-    font-size:16px;
-    line-height:1.6;
-  }
-
-  h1,h2,h3{
-    font-family:'Source Serif 4', serif;
-    font-weight:600;
-    margin:0;
-    color:var(--ink);
-  }
-
-  a{ color:var(--bronze); text-decoration:none; }
-  a:hover, a:focus-visible{ text-decoration:underline; }
-  a:focus-visible, button:focus-visible{ outline:2px solid var(--bronze); outline-offset:3px; }
-
-  .layout{
-    display:grid;
-    grid-template-columns: 320px 1fr;
-    min-height:100vh;
-  }
-
-  /* ---------- Sidebar ---------- */
-  .sidebar{
-    background:var(--ink);
-    color:var(--ivory);
-    padding:56px 40px;
-    position:sticky;
-    top:0;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-  }
-
-  .sidebar-top .eyebrow{
-    display:block;
-    font-size:13px;
-    letter-spacing:0.02em;
-    color:rgba(246,243,236,0.6);
-    margin-bottom:18px;
-  }
-
-  .sidebar h1{
-    color:var(--ivory);
-    font-size:2.1rem;
-    line-height:1.15;
-    margin-bottom:10px;
-  }
-
-  .role-line{
-    color:var(--bronze);
-    font-size:1.02rem;
-    font-family:'Source Serif 4', serif;
-    font-style:italic;
-    margin-bottom:34px;
-  }
-
-  .sidebar nav{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    margin-bottom:34px;
-  }
-
-  .sidebar nav a{
-    color:rgba(246,243,236,0.82);
-    font-size:0.95rem;
-  }
-  .sidebar nav a:hover{ color:var(--ivory); }
-
-  .contact-block{
-    border-top:1px solid rgba(246,243,236,0.18);
-    padding-top:24px;
-    font-size:0.9rem;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    color:rgba(246,243,236,0.75);
-  }
-
-  .contact-block a{ color:rgba(246,243,236,0.9); }
-
-  .sidebar footer{
-    font-size:0.78rem;
-    color:rgba(246,243,236,0.4);
-    margin-top:24px;
-  }
-
-  /* ---------- Main ---------- */
-  main{
-    padding:64px 72px 100px;
-    max-width:920px;
-  }
-
-  section{
-    margin-bottom:64px;
-    scroll-margin-top:40px;
-  }
-
-  section h2{
-    font-size:1.5rem;
-    margin-bottom:24px;
-    padding-bottom:14px;
-    border-bottom:1px solid var(--line);
-  }
-
-  .lede{
-    font-size:1.15rem;
-    max-width:var(--max-line);
-    color:var(--graphite);
-    font-family:'Source Serif 4', serif;
-    line-height:1.65;
-  }
-
-  .placeholder{
-    background: rgba(169,121,62,0.09);
-    border-left:3px solid var(--bronze);
-    padding:2px 8px;
-    border-radius:2px;
-  }
-
-  /* Experience */
-  .role{
-    display:grid;
-    grid-template-columns: 150px 1fr;
-    gap:24px;
-    padding:22px 0;
-    border-bottom:1px solid var(--line);
-  }
-  .role:last-child{ border-bottom:none; }
-
-  .role .period{
-    font-size:0.85rem;
-    color:var(--graphite);
-    opacity:0.75;
-    padding-top:4px;
-  }
-
-  .role h3{
-    font-size:1.08rem;
-    margin-bottom:4px;
-  }
-
-  .role .org{
-    font-size:0.92rem;
-    color:var(--bronze);
-    margin-bottom:10px;
-    display:block;
-  }
-
-  .role p{
-    margin:0;
-    color:var(--graphite);
-    font-size:0.95rem;
-    max-width:var(--max-line);
-  }
-
-  /* Skills */
-  .skills-grid{
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap:12px 40px;
-  }
-
-  .skill-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    padding:10px 0;
-    border-bottom:1px solid var(--line);
-    font-size:0.95rem;
-  }
-
-  .skill-item span.tag{
-    font-size:0.78rem;
-    color:var(--bronze);
-    font-family:'Source Serif 4', serif;
-    font-style:italic;
-  }
-
-  /* Education */
-  .edu-item{
-    padding:18px 0;
-    border-bottom:1px solid var(--line);
-  }
-  .edu-item:last-child{ border-bottom:none; }
-  .edu-item h3{ font-size:1.02rem; margin-bottom:4px; }
-  .edu-item .meta{
-    font-size:0.88rem;
-    color:var(--graphite);
-    opacity:0.8;
-  }
-
-  /* Responsive */
-  @media (max-width: 880px){
-    .layout{ grid-template-columns: 1fr; }
-    .sidebar{
-      position:relative;
-      height:auto;
-      padding:40px 28px;
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Source Serif 4', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              ink: '#1C2B39',
+              ivory: '#F8F6F0',
+              bronze: '#A9793E',
+              graphite: '#3A4048',
+              indigo: '#4f46e5',
+            }
+          }
+        }
+      }
     }
-    main{ padding:48px 28px 80px; }
-    .skills-grid{ grid-template-columns: 1fr; }
-    .role{ grid-template-columns: 1fr; gap:6px; }
-    .role .period{ padding-top:0; }
-  }
+  </script>
 
-  @media (prefers-reduced-motion: reduce){
-    html{ scroll-behavior:auto; }
-  }
-</style>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .card-hover-glow {
+      transition: all 0.25s ease;
+    }
+    .card-hover-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px -10px rgba(79, 70, 229, 0.15);
+    }
+    .dark .card-hover-glow:hover {
+      box-shadow: 0 16px 32px -10px rgba(99, 102, 241, 0.3);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(169, 121, 62, 0.4);
+      border-radius: 3px;
+    }
+  </style>
 </head>
-<body>
+<body class="bg-[#F8F6F0] dark:bg-slate-950 text-[#1C2B39] dark:text-slate-100 font-sans antialiased transition-colors duration-300">
 
-<div class="layout">
+  <div class="min-h-screen flex flex-col lg:flex-row">
 
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <span class="eyebrow">Gestão &amp; Administração</span>
-      <h1>Charles Dias<br>de Almeida</h1>
-      <p class="role-line">
-        <!-- EDITE: seu cargo/atuação atual -->
-        Profissional de Gestão Administrativa
-      </p>
-
-      <nav>
-        <a href="#sobre">Sobre</a>
-        <a href="#experiencia">Experiência</a>
-        <a href="#formacao">Formação</a>
-        <a href="#competencias">Competências</a>
-        <a href="#contato">Contato</a>
-      </nav>
-    </div>
-
-    <div>
-      <div class="contact-block" id="contato">
-        <!-- EDITE: seus dados de contato reais -->
-        <a href="mailto:seuemail@exemplo.com">seuemail@exemplo.com</a>
-        <a href="tel:+5500000000000">(00) 00000-0000</a>
-        <a href="https://www.linkedin.com/in/seu-perfil" target="_blank" rel="noopener">linkedin.com/in/seu-perfil</a>
-        <span>Vila Velha, ES</span>
-      </div>
-      <footer>Currículo em formato web · atualizado em 2026</footer>
-    </div>
-  </aside>
-
-  <main>
-
-    <section id="sobre">
-      <h2>Sobre</h2>
-      <p class="lede">
-        <!-- EDITE: seu resumo profissional (1-2 frases) -->
-        <span class="placeholder">Escreva aqui um resumo curto sobre sua atuação em gestão e administração — o que você faz, seu diferencial e o tipo de resultado que costuma entregar.</span>
-      </p>
-    </section>
-
-    <section id="experiencia">
-      <h2>Experiência Profissional</h2>
-
-      <div class="role">
-        <div class="period"><span class="placeholder">2023 — atual</span></div>
+    <!-- SIDEBAR DE NAVEGAÇÃO & PERFIL -->
+    <aside class="w-full lg:w-80 lg:min-h-screen bg-[#1C2B39] text-[#F8F6F0] p-6 sm:p-8 lg:sticky lg:top-0 flex flex-col justify-between z-30 shadow-xl">
+      <div class="space-y-8">
+        <!-- Brand / Identity -->
         <div>
-          <h3><span class="placeholder">Cargo</span></h3>
-          <span class="org"><span class="placeholder">Nome da Empresa</span></span>
-          <p><span class="placeholder">Descreva brevemente suas principais responsabilidades e resultados nesta posição.</span></p>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 text-amber-300 text-xs font-mono uppercase tracking-wider mb-4 border border-white/10">
+            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> Doutorado 2026
+          </div>
+          <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+            Charles Dias<br>de Almeida
+          </h1>
+          <p class="font-serif italic text-amber-400 text-sm mt-1.5">
+            Pesquisador em Smart Grids & Sistemas Inteligentes
+          </p>
+          <p class="text-xs text-slate-300/80 mt-2 leading-relaxed">
+            Orientação: Prof. Dr. Helder<br>
+            Foco: Governança Energética, Modelagem Multiagente (LLM-MAS) e Simulação Social
+          </p>
         </div>
+
+        <!-- Navigation Menu -->
+        <nav class="space-y-1.5 text-sm font-medium">
+          <!-- Featured Paper Call -->
+          <a href="gplab-innovate.html" class="flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold shadow-md hover:from-indigo-500 hover:to-indigo-600 transition group">
+            <span class="flex items-center gap-2">
+              <i data-lucide="file-text" class="w-4 h-4 text-amber-300"></i>
+              <span>Artigo GPLab-Innovate</span>
+            </span>
+            <span class="text-xs px-1.5 py-0.5 rounded bg-white/20 text-white group-hover:translate-x-1 transition">Ver ➔</span>
+          </a>
+
+          <a href="gplab-innovate.html#simulador" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
+            <i data-lucide="play-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Simulador Web Interativo</span>
+          </a>
+
+          <a href="#atividades" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
+            <i data-lucide="check-square" class="w-4 h-4 text-cyan-400"></i>
+            <span>Atividades da Disciplina</span>
+          </a>
+
+          <a href="#sobre" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
+            <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+            <span>Sobre o Pesquisador</span>
+          </a>
+
+          <a href="#competencias" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
+            <i data-lucide="cpu" class="w-4 h-4 text-slate-400"></i>
+            <span>Competências & Tecnologias</span>
+          </a>
+
+          <a href="#contato" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
+            <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+            <span>Contato</span>
+          </a>
+        </nav>
       </div>
 
-      <div class="role">
-        <div class="period"><span class="placeholder">2020 — 2023</span></div>
-        <div>
-          <h3><span class="placeholder">Cargo anterior</span></h3>
-          <span class="org"><span class="placeholder">Nome da Empresa</span></span>
-          <p><span class="placeholder">Descreva brevemente suas principais responsabilidades e resultados nesta posição.</span></p>
+      <!-- Bottom Contacts and Meta -->
+      <div class="mt-8 pt-6 border-t border-white/15 text-xs text-slate-300/80 space-y-2">
+        <div class="flex items-center justify-between">
+          <span>Tema:</span>
+          <button id="theme-toggle" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1">
+            <i data-lucide="sun" id="theme-icon-sun" class="w-3.5 h-3.5"></i>
+            <i data-lucide="moon" id="theme-icon-moon" class="w-3.5 h-3.5 hidden"></i>
+            <span class="text-[11px]">Alternar</span>
+          </button>
         </div>
+        <p class="pt-2 text-[11px] text-slate-400">
+          Vila Velha, Espírito Santo — Brasil<br>
+          Hospedado via GitHub Pages (<code>github.io</code>)
+        </p>
       </div>
+    </aside>
 
-      <div class="role">
-        <div class="period"><span class="placeholder">2017 — 2020</span></div>
-        <div>
-          <h3><span class="placeholder">Cargo anterior</span></h3>
-          <span class="org"><span class="placeholder">Nome da Empresa</span></span>
-          <p><span class="placeholder">Descreva brevemente suas principais responsabilidades e resultados nesta posição.</span></p>
+    <!-- CONTEÚDO PRINCIPAL (PORTAL) -->
+    <main class="flex-1 p-6 sm:p-10 lg:p-14 max-w-5xl space-y-12">
+
+      <!-- HERO BANNER: CHAMADA PRINCIPAL PARA O NOVO ARTIGO -->
+      <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-[#1C2B39] to-slate-950 text-white p-7 sm:p-10 shadow-xl border border-indigo-500/30 card-hover-glow">
+        <div class="relative z-10 space-y-5">
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-300 text-xs font-mono font-bold tracking-wider border border-indigo-400/40 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> PUBLICAÇÃO EM DESTAQUE
+            </span>
+            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold border border-emerald-500/30">
+              JASSS 2026 Extension
+            </span>
+            <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-semibold border border-cyan-500/30">
+              Simulador Interativo Disponível
+            </span>
+          </div>
+
+          <h2 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold leading-snug tracking-tight text-white">
+            GPLab-Innovate: Aprimoramento e Estudo Empírico de um Framework Generativo Baseado em Agentes para Simulação Social Aberta
+          </h2>
+
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl">
+            Trabalho desenvolvido no âmbito da disciplina de <strong>Smart Grids</strong> (Doutorado 2026). Estende o framework GPLab introduzindo memória adaptativa com decaimento multidimensional, cache semântico para LLMs com <strong>62,3% de taxa de acerto</strong>, emergência de normas sociais e governança em malha fechada via <em>Policy Steering</em>.
+          </p>
+
+          <!-- Key Metrics Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+            <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-center">
+              <span class="block text-2xl font-extrabold text-indigo-400">62,3%</span>
+              <span class="text-[11px] text-slate-300">Hit Rate no Cache</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-center">
+              <span class="block text-2xl font-extrabold text-emerald-400">+18%</span>
+              <span class="text-[11px] text-slate-300">Coerência Decisória</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-center">
+              <span class="block text-2xl font-extrabold text-cyan-400">0,42 → 0,67</span>
+              <span class="text-[11px] text-slate-300">Capital Social</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 text-center">
+              <span class="block text-2xl font-extrabold text-amber-400">8</span>
+              <span class="text-[11px] text-slate-300">Módulos Inovadores</span>
+            </div>
+          </div>
+
+          <!-- PRIMARY ACTION BUTTONS: CHAMA A NOVA PÁGINA -->
+          <div class="flex flex-wrap items-center gap-3 pt-4">
+            <a href="gplab-innovate.html" class="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white font-bold text-sm shadow-lg shadow-indigo-500/40 flex items-center gap-2 transition active:scale-95 group">
+              <i data-lucide="book-open" class="w-4 h-4 text-amber-300"></i>
+              <span>Abrir Artigo Completo (gplab-innovate.html)</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+            </a>
+
+            <a href="gplab-innovate.html#simulador" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 flex items-center gap-2 transition">
+              <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+              <span>Executar Simulador Web</span>
+            </a>
+
+            <a href="gplab-innovate.html#codigo" class="px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-semibold text-sm border border-white/10 flex items-center gap-1.5 transition">
+              <i data-lucide="code" class="w-4 h-4"></i>
+              <span>Código Python</span>
+            </a>
+          </div>
+
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="formacao">
-      <h2>Formação Acadêmica</h2>
+      <!-- ATIVIDADES DA DISCIPLINA SMART GRIDS -->
+      <section id="atividades" class="scroll-mt-10 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#1C2B39]/15 dark:border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-mono uppercase tracking-wider text-[#A9793E] font-bold">Roteiro de Atividades</span>
+            <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1C2B39] dark:text-white">
+              Atividades da Disciplina de Smart Grids (Prof. Dr. Helder)
+            </h3>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-medium">
+            Progresso 2026
+          </span>
+        </div>
 
-      <div class="edu-item">
-        <h3><span class="placeholder">Curso / Graduação</span></h3>
-        <div class="meta"><span class="placeholder">Instituição · Ano de conclusão</span></div>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+          
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Atividade 1</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 text-[10px] font-bold">CONCLUÍDO</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400">
+              Criação da página pessoal e estruturação para publicação no GitHub Pages (<code>charlesdiasdealmeida.github.io</code>).
+            </p>
+          </div>
 
-      <div class="edu-item">
-        <h3><span class="placeholder">Curso complementar / Certificação</span></h3>
-        <div class="meta"><span class="placeholder">Instituição · Ano</span></div>
-      </div>
-    </section>
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Atividade 2</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 text-[10px] font-bold">CONCLUÍDO</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400">
+              Busca e mapeamento de artigos de referência em modelagem, IA generativa, renováveis e políticas públicas energéticas.
+            </p>
+          </div>
 
-    <section id="competencias">
-      <h2>Competências</h2>
-      <div class="skills-grid">
-        <div class="skill-item"><span class="placeholder">Gestão de equipes</span> <span class="tag">avançado</span></div>
-        <div class="skill-item"><span class="placeholder">Excel avançado</span> <span class="tag">avançado</span></div>
-        <div class="skill-item"><span class="placeholder">Gestão de processos</span> <span class="tag">avançado</span></div>
-        <div class="skill-item"><span class="placeholder">Planejamento estratégico</span> <span class="tag">intermediário</span></div>
-        <div class="skill-item"><span class="placeholder">Atendimento ao cliente</span> <span class="tag">avançado</span></div>
-        <div class="skill-item"><span class="placeholder">Sistemas de gestão (ERP)</span> <span class="tag">intermediário</span></div>
-      </div>
-    </section>
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Atividades 3, 4 & 5</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 text-[10px] font-bold">CONCLUÍDO</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400">
+              Implementação do código Python do GPLab, extensão com as 8 inovações disruptivas, testes no DeepSeek e geração de tabelas/gráficos.
+            </p>
+          </div>
 
-  </main>
-</div>
+          <div class="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-indigo-900 dark:text-indigo-200">Atividade 6</span>
+              <span class="px-2 py-0.5 rounded bg-indigo-600 text-white text-[10px] font-bold">PUBLICADO</span>
+            </div>
+            <p class="text-slate-700 dark:text-indigo-200">
+              Artigo gerado a partir das inovações e publicado em formato web com simulador ao vivo: 
+              <a href="gplab-innovate.html" class="underline font-semibold text-indigo-600 dark:text-indigo-300">Acessar Artigo GPLab-Innovate ➔</a>
+            </p>
+          </div>
 
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Atividades 7 & 8</span>
+              <span class="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 text-[10px] font-bold">EM DESENVOLVIMENTO</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400">
+              Criação de um jogo interativo com linguagem didática para estudantes de ensino médio e publicação integrada ao portal.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Atividade 9</span>
+              <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold">PLANEJADO</span>
+            </div>
+            <p class="text-slate-600 dark:text-slate-400">
+              Avatar interativo na página index com animação, síntese de voz e movimentação orientada por IA.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SOBRE O PESQUISADOR -->
+      <section id="sobre" class="scroll-mt-10 space-y-4">
+        <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1C2B39] dark:text-white border-b border-[#1C2B39]/15 dark:border-slate-800 pb-3">
+          Sobre o Pesquisador
+        </h3>
+        <div class="prose dark:prose-invert max-w-none text-sm text-[#3A4048] dark:text-slate-300 leading-relaxed font-serif">
+          <p>
+            <strong>Charles Dias de Almeida</strong> é pós-graduando (Doutorado 2026) atuando na confluência entre sistemas elétricos de potência (<em>Smart Grids</em>), políticas públicas para transição energética e inteligência artificial generativa baseada em sistemas multiagentes (LLM-MAS).
+          </p>
+          <p>
+            Sua pesquisa investiga como agentes inteligentes equipados com memória adaptativa e aprendizado por reforço podem modelar o comportamento de consumidores, produtores e governos frente a incentivos tarifários, subsídios renováveis e dinâmicas de normas sociais no Espírito Santo e no Brasil.
+          </p>
+        </div>
+      </section>
+
+      <!-- COMPETÊNCIAS & FERRAMENTAS -->
+      <section id="competencias" class="scroll-mt-10 space-y-4">
+        <h3 class="font-serif text-xl sm:text-2xl font-bold text-[#1C2B39] dark:text-white border-b border-[#1C2B39]/15 dark:border-slate-800 pb-3">
+          Competências & Ferramentas
+        </h3>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span class="font-bold block text-indigo-600 dark:text-indigo-400 mb-1">Simulação Social</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px]">GPLab, ABM, LLM-MAS, Teoria do Comportamento Planejado</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span class="font-bold block text-indigo-600 dark:text-indigo-400 mb-1">Engenharia de IA</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px]">Python, Prompt Engineering, Agent Harness, Caching Semântico</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span class="font-bold block text-indigo-600 dark:text-indigo-400 mb-1">Smart Grids & Energia</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px]">Fontes Renováveis, Políticas Tarifárias, Governança Energética</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span class="font-bold block text-indigo-600 dark:text-indigo-400 mb-1">Computação Científica</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px]">Q-Learning, Otimização Matemática, Detecção de Anomalias</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span class="font-bold block text-indigo-600 dark:text-indigo-400 mb-1">Gestão & Governança</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px]">Planejamento Estratégico, Gestão de Processos, Políticas Públicas</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <span class="font-bold block text-indigo-600 dark:text-indigo-400 mb-1">Deploy & Web</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px]">GitHub Pages, HTML5 Interativo, Visualização com Chart.js</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTATO -->
+      <section id="contato" class="scroll-mt-10 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+        <h3 class="font-serif text-lg font-bold text-[#1C2B39] dark:text-white flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4 text-indigo-600"></i> Informações de Contato
+        </h3>
+        <p class="text-xs text-slate-600 dark:text-slate-400">
+          Para dúvidas sobre os experimentos do GPLab-Innovate ou pesquisas em Smart Grids:
+        </p>
+        <div class="flex flex-wrap gap-4 text-xs font-medium text-indigo-600 dark:text-indigo-400 pt-1">
+          <a href="gplab-innovate.html" class="flex items-center gap-1 hover:underline">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Artigo Completo
+          </a>
+          <a href="curriculo_charles_backup.html" class="flex items-center gap-1 hover:underline">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i> Currículo Administrativo (Backup)
+          </a>
+          <span class="text-slate-400">|</span>
+          <span class="text-slate-600 dark:text-slate-300 flex items-center gap-1">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#A9793E]"></i> Vila Velha, ES
+          </span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const moonIcon = document.getElementById('theme-icon-moon');
+    const sunIcon = document.getElementById('theme-icon-sun');
+
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        moonIcon.classList.remove('hidden');
+        sunIcon.classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme ? savedTheme === 'dark' : systemPrefersDark);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(!isDark);
+      localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+    });
+  </script>
 </body>
 </html>
