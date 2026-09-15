@@ -101,6 +101,11 @@
             <span>Simulador Web Interativo</span>
           </a>
 
+          <a href="gplab-innovate.html" onclick="localStorage.setItem('openAvatar', 'true')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
+            <i data-lucide="bot" class="w-4 h-4 text-amber-400 animate-pulse"></i>
+            <span>Avatar Guia (Voz & Movimento)</span>
+          </a>
+
           <a href="#atividades" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-200 hover:bg-white/10 hover:text-white transition text-xs">
             <i data-lucide="check-square" class="w-4 h-4 text-cyan-400"></i>
             <span>Atividades da Disciplina</span>
@@ -276,13 +281,16 @@
             </p>
           </div>
 
-          <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-800 dark:text-slate-200">Atividade 9</span>
-              <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold">PLANEJADO</span>
+              <span class="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                <i data-lucide="bot" class="w-3.5 h-3.5 text-amber-600"></i> Atividade 9
+              </span>
+              <span class="px-2 py-0.5 rounded bg-amber-600 text-white text-[10px] font-bold">CONCLUÍDO</span>
             </div>
-            <p class="text-slate-600 dark:text-slate-400">
-              Avatar interativo na página index com animação, síntese de voz e movimentação orientada por IA.
+            <p class="text-slate-700 dark:text-amber-200">
+              Avatar interativo implementado com movimentação, rastreamento de olhar (eye-tracking), lip-sync e síntese de voz (Web Speech + Web Audio):
+              <a href="gplab-innovate.html" class="underline font-semibold text-amber-700 dark:text-amber-300 block mt-1">Experimentar Avatar no GPLab-Innovate ➔</a>
             </p>
           </div>
 
